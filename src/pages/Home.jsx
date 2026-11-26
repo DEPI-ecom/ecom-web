@@ -8,7 +8,7 @@ export default function Home() {
     const { data, loading, error } = useAsync(async () => {
         const [productData, categories] = await Promise.all([
             listProducts({ limit: 8, sort: 'newest' }),
-            listCategories(),
+            listCategories().catch(() => []),
         ]);
         return { products: productData.products ?? [], categories };
     }, []);
