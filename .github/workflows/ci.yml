@@ -1,0 +1,25 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint-and-build:
+    runs-on: ubuntu-latest
+    env:
+      VITE_API_BASE_URL: /api
+      VITE_DEFAULT_CURRENCY: USD
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install
+        run: if [ -f package-lock.json ]; then npm ci; else npm install; fi
+      - run: npm run lint --if-present
+      - run: npm test --if-present
+      - run: npm run build
+      - name: Build image
+        if: hashFiles('Dockerfile') != ''
+        run: docker build -t ecom-web:ci .
