@@ -63,21 +63,25 @@ export default function Checkout() {
     if (result) {
         const { order, payment } = result;
         const paid = order.status === 'PAID';
+        const failed = order.status === 'PAYMENT_FAILED';
+        const heading = paid ? 'Order placed' : failed ? 'Payment failed' : 'Order processing';
+        const type = paid ? 'success' : failed ? 'error' : 'info';
+        const text = paid
+            ? 'Your simulated payment succeeded.'
+            : failed
+                ? `${payment?.failureReason ?? 'Simulated payment failure'}. Your cart was kept so you can try again.`
+                : 'Your order was received but is not confirmed yet. Check its status on the order page.';
         return (
             <div className="container narrow">
-                <h1>{paid ? 'Order placed' : 'Payment failed'}</h1>
-                <StatusMessage type={paid ? 'success' : 'error'}>
-                    {paid
-                        ? 'Your simulated payment succeeded.'
-                        : `${payment?.failureReason ?? 'Simulated payment failure'}. Your cart was kept so you can try again.`}
-                </StatusMessage>
+                <h1>{heading}</h1>
+                <StatusMessage type={type}>{text}</StatusMessage>
                 <p>
                     Order <strong>{order.id}</strong>: total {formatMoney(order.total, order.currency)}
                 </p>
                 {payment?.mockReference && <p className="muted">Mock payment reference: {payment.mockReference}</p>}
                 <div className="form-actions">
                     <Link to={`/orders/${order.id}`}>View order</Link>
-                    {!paid && (
+                    {failed && (
                         <button type="button" onClick={handleTryAgain}>
                             Try again
                         </button>
